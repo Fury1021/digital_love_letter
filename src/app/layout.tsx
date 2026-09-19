@@ -30,6 +30,14 @@ export const metadata: Metadata = {
       "Create and send personalized digital love letters with animated envelopes and vintage script calligraphy.",
     type: "website",
   },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+  },
 };
 
 export default function RootLayout({
