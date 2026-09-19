@@ -17,9 +17,14 @@ export const Navbar: React.FC = () => {
           <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-rose-600 to-pink-500 flex items-center justify-center text-white shadow-md shadow-rose-500/20 group-hover:scale-105 transition-transform">
             <Heart className="w-5 h-5 fill-white" />
           </div>
-          <span className="font-serif text-lg sm:text-xl font-medium tracking-tight text-zinc-900 group-hover:text-rose-700 transition-colors">
-            LoveLetter<span className="text-rose-600">.</span>
-          </span>
+          <div className="flex flex-col">
+            <span className="font-serif text-lg sm:text-xl font-medium tracking-tight text-zinc-900 group-hover:text-rose-700 transition-colors leading-tight">
+              LoveLetter<span className="text-rose-600">.</span>
+            </span>
+            <span className="text-[10px] text-zinc-400 font-sans tracking-wider uppercase font-medium">
+              by DIO
+            </span>
+          </div>
         </Link>
 
         {/* Right action button */}

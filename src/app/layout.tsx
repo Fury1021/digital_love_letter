@@ -24,6 +24,8 @@ export const metadata: Metadata = {
     "anniversary letter",
     "handwritten letter online",
   ],
+  authors: [{ name: "DIO" }],
+  creator: "DIO",
   openGraph: {
     title: "LoveLetter — A Little Piece of My Heart, Written Just for You",
     description:
