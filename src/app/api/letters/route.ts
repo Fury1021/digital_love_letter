@@ -35,14 +35,19 @@ export async function POST(req: Request) {
     }
 
     const record: LetterRecord = {
-      id: body.id || `letter_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      id: body.id || Math.random().toString(36).slice(2, 6) + Math.random().toString(36).slice(2, 6),
       encodedId: String(body.encodedId),
-      recipient: String(body.recipient).slice(0, 100),
+      recipient: String(body.recipient || "").slice(0, 100),
       sender: String(body.sender || "").slice(0, 100),
       title: String(body.title || "").slice(0, 150),
       theme: body.theme || "rose",
       font: body.font || "great-vibes",
+      background: body.background || "paper",
+      content: String(body.content || ""),
       contentSnippet: String(body.content || "").slice(0, 200),
+      decorations: body.decorations || { hearts: true, roses: true, sparkles: true },
+      alignment: body.alignment || "center",
+      fontSize: body.fontSize || "base",
       createdAt: body.createdAt || new Date().toISOString(),
     };
 

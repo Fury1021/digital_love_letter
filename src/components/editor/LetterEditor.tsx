@@ -35,6 +35,8 @@ export const LetterEditor: React.FC = () => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
+  const [fullEncodedUrl, setFullEncodedUrl] = useState("");
+  const [showFullUrl, setShowFullUrl] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [isPdfLoading, setIsPdfLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -64,26 +66,47 @@ export const LetterEditor: React.FC = () => {
     return () => clearTimeout(timer);
   }, [letter, isClient]);
 
-  // Handle Share link generation
+  // Handle Share link generation with clean Short ID
   const handleGenerateShareLink = () => {
     try {
       const encoded = encodeLetter(letter);
-      const url = `${window.location.origin}/letter/${encoded}`;
-      setShareUrl(url);
+      // Generate clean 8-character alphanumeric short ID
+      const shortId =
+        Math.random().toString(36).slice(2, 6) +
+        Math.random().toString(36).slice(2, 6);
+
+      const shortUrl = `${window.location.origin}/letter/${shortId}`;
+      const longUrl = `${window.location.origin}/letter/${encoded}`;
+
+      setShareUrl(shortUrl);
+      setFullEncodedUrl(longUrl);
+      setShowFullUrl(false);
       setIsShareModalOpen(true);
 
-      // Asynchronously log to admin ledger (non-blocking)
+      // Cache locally on creator's device for instantaneous 0ms resolution
+      try {
+        localStorage.setItem(`love_letter_${shortId}`, encoded);
+      } catch {
+        // Ignore
+      }
+
+      // Asynchronously log to admin ledger and persistent storage
       fetch("/api/letters", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          id: shortId,
           encodedId: encoded,
           recipient: letter.recipient,
           sender: letter.sender,
           title: letter.title,
           theme: letter.theme,
           font: letter.font,
+          background: letter.background,
           content: letter.content,
+          decorations: letter.decorations,
+          alignment: letter.alignment,
+          fontSize: letter.fontSize,
           createdAt: letter.createdAt || new Date().toISOString(),
         }),
       }).catch((err) => {
@@ -327,7 +350,7 @@ export const LetterEditor: React.FC = () => {
             <input
               type="text"
               readOnly
-              value={shareUrl}
+              value={showFullUrl ? fullEncodedUrl : shareUrl}
               className="flex-1 bg-transparent px-3 py-1.5 text-xs sm:text-sm text-zinc-800 font-mono focus:outline-none select-all truncate"
             />
             <Button
@@ -340,10 +363,34 @@ export const LetterEditor: React.FC = () => {
                   <Copy className="w-3.5 h-3.5" />
                 )
               }
-              onClick={handleCopyLink}
+              onClick={async () => {
+                const target = showFullUrl ? fullEncodedUrl : shareUrl;
+                try {
+                  await navigator.clipboard.writeText(target);
+                  setIsCopied(true);
+                  showToast("Link copied to clipboard ❤️");
+                  setTimeout(() => setIsCopied(false), 2500);
+                } catch {
+                  showToast("Failed to copy link.");
+                }
+              }}
             >
               {isCopied ? "Copied!" : "Copy"}
             </Button>
+          </div>
+
+          {/* Short Link indicator & toggle */}
+          <div className="flex items-center justify-between text-xs text-zinc-500 px-1">
+            <span className="text-emerald-700 font-medium flex items-center gap-1">
+              <span>⚡</span> {showFullUrl ? "Self-contained encoded URL" : "Clean, short shareable link"}
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowFullUrl(!showFullUrl)}
+              className="text-rose-600 hover:underline hover:text-rose-700 font-medium"
+            >
+              {showFullUrl ? "Use Short Link" : "View Full URL"}
+            </button>
           </div>
 
           {/* Action Buttons */}

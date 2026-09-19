@@ -1,4 +1,4 @@
-import { LetterFont, LetterTheme } from "./letter";
+import { LetterFont, LetterTheme, LetterBackground, LetterDecorations, TextAlignment, TextFontSize } from "./letter";
 
 export interface LetterRecord {
   id: string;
@@ -8,7 +8,12 @@ export interface LetterRecord {
   title: string;
   theme: LetterTheme;
   font: LetterFont;
+  background?: LetterBackground;
+  content?: string;
   contentSnippet: string;
+  decorations?: LetterDecorations;
+  alignment?: TextAlignment;
+  fontSize?: TextFontSize;
   createdAt: string;
 }
 

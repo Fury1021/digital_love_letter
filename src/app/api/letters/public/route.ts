@@ -33,12 +33,19 @@ export async function GET(req: Request) {
     return NextResponse.json({
       success: true,
       encodedId: match.encodedId,
-      recipient: match.recipient,
-      sender: match.sender,
-      title: match.title,
-      theme: match.theme,
-      font: match.font,
-      createdAt: match.createdAt,
+      letter: {
+        recipient: match.recipient,
+        sender: match.sender,
+        title: match.title,
+        content: match.content || match.contentSnippet,
+        theme: match.theme,
+        font: match.font,
+        background: match.background || "paper",
+        decorations: match.decorations || { hearts: true, roses: true, sparkles: true },
+        alignment: match.alignment || "center",
+        fontSize: match.fontSize || "base",
+        createdAt: match.createdAt,
+      },
     });
   } catch (err) {
     console.error("Public letter lookup error:", err);

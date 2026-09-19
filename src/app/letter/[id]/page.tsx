@@ -65,17 +65,41 @@ export default function LetterDetailPage() {
       return;
     }
 
-    // 2. If decoding fails, check if targetId is an ID in the ledger (e.g., from admin list)
+    // 2. Check local client cache for short ID
+    try {
+      const cached = localStorage.getItem(`love_letter_${targetId}`);
+      if (cached) {
+        const decodedCached = decodeLetter(cached);
+        if (decodedCached) {
+          setLetter(decodedCached);
+          setIsError(false);
+          setIsLoading(false);
+          return;
+        }
+      }
+    } catch {
+      // Ignore
+    }
+
+    // 3. If decoding fails, check if targetId is an ID in the ledger (e.g., from admin list or short ID)
     fetch(`/api/letters/public?id=${encodeURIComponent(targetId)}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data && data.success && data.encodedId) {
-          const letterFromId = decodeLetter(data.encodedId);
-          if (letterFromId) {
-            setLetter(letterFromId);
+        if (data && data.success) {
+          if (data.letter) {
+            setLetter(data.letter);
             setIsError(false);
             setIsLoading(false);
             return;
+          }
+          if (data.encodedId) {
+            const letterFromId = decodeLetter(data.encodedId);
+            if (letterFromId) {
+              setLetter(letterFromId);
+              setIsError(false);
+              setIsLoading(false);
+              return;
+            }
           }
         }
         setIsError(true);
