@@ -34,7 +34,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
                 key={theme.id}
                 type="button"
                 onClick={() => onChangeTheme(theme.id)}
-                className={`p-2.5 text-left rounded-xl border transition-all flex items-center gap-2.5 ${
+                className={`p-2.5 text-left rounded-xl border transition-all flex items-center gap-2.5 min-w-0 overflow-hidden ${
                   isSelected
                     ? "bg-rose-50 border-rose-500 ring-2 ring-rose-400/20 shadow-sm"
                     : "bg-white border-zinc-200/80 hover:border-rose-200 hover:bg-rose-50/30"
@@ -69,7 +69,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
                 key={bg.id}
                 type="button"
                 onClick={() => onChangeBackground(bg.id)}
-                className={`p-2.5 text-left rounded-xl border transition-all flex items-center gap-2.5 ${
+                className={`p-2.5 text-left rounded-xl border transition-all flex items-center gap-2.5 min-w-0 overflow-hidden ${
                   isSelected
                     ? "bg-rose-50 border-rose-500 ring-2 ring-rose-400/20 shadow-sm"
                     : "bg-white border-zinc-200/80 hover:border-rose-200 hover:bg-rose-50/30"

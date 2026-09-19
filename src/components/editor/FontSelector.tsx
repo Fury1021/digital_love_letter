@@ -29,7 +29,7 @@ export const FontSelector: React.FC<FontSelectorProps> = ({
               key={option.id}
               type="button"
               onClick={() => onChangeFont(option.id)}
-              className={`p-3 text-left rounded-xl border transition-all relative group ${
+              className={`p-3 text-left rounded-xl border transition-all relative group min-w-0 overflow-hidden ${
                 isSelected
                   ? "bg-rose-50/80 border-rose-500 ring-2 ring-rose-400/20 shadow-sm"
                   : "bg-white border-zinc-200/80 hover:border-rose-200 hover:bg-rose-50/30"
