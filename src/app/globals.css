@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #fffdfc;
+    --foreground: #1f1a1c;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    min-height: 100vh;
+    font-family: var(--font-inter), sans-serif;
+  }
+}
+
+/* Paper Stationery Subtle Texture */
+.paper-texture {
+  background-color: #fdfbf7;
+  background-image: radial-gradient(#be123c0a 0.75px, transparent 0.75px);
+  background-size: 16px 16px;
+}
+
+/* Watermark Heart Pattern */
+.bg-hearts-pattern {
+  background-color: #fff5f7;
+  background-image: radial-gradient(#fb718515 1px, transparent 1px), radial-gradient(#e11d4810 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-position: 0 0, 14px 14px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #fecdd3;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #fb7185;
+}
+
+/* Print optimizations */
+@media print {
+  header, footer, nav, button, .no-print {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+  }
+}
