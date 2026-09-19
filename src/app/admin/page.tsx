@@ -20,6 +20,8 @@ import {
   Calendar,
   Sparkles,
   Info,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 export default function AdminPage() {
@@ -182,6 +184,15 @@ export default function AdminPage() {
     showToast("CSV exported successfully");
   };
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  // Reset page to 1 on search or theme filter change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, themeFilter, pageSize]);
+
   // Filter letters
   const filteredLetters = letters.filter((l) => {
     const matchesSearch =
@@ -194,6 +205,10 @@ export default function AdminPage() {
 
     return matchesSearch && matchesTheme;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredLetters.length / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedLetters = filteredLetters.slice(startIndex, startIndex + pageSize);
 
   const todayLettersCount = letters.filter((l) => {
     const date = new Date(l.createdAt).toDateString();
@@ -422,7 +437,7 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-rose-100/60 text-zinc-700">
-                {filteredLetters.map((letter) => (
+                {paginatedLetters.map((letter) => (
                   <tr
                     key={letter.id}
                     className="hover:bg-rose-50/40 transition-colors"
@@ -507,6 +522,59 @@ export default function AdminPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Pagination Controls */}
+          <div className="px-4 sm:px-6 py-4 border-t border-rose-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/50 text-xs text-zinc-600">
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+              <span>
+                Showing <strong>{filteredLetters.length === 0 ? 0 : startIndex + 1}</strong> to{" "}
+                <strong>{Math.min(startIndex + pageSize, filteredLetters.length)}</strong> of{" "}
+                <strong>{filteredLetters.length}</strong> letters
+              </span>
+
+              <div className="flex items-center gap-1.5 pl-2 border-l border-rose-100">
+                <span>Per page:</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  className="bg-white border border-rose-200 rounded-lg px-2 py-1 text-xs text-zinc-700 focus:outline-none focus:ring-1 focus:ring-rose-400"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Previous / Next buttons */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                icon={<ChevronLeft className="w-3.5 h-3.5" />}
+                disabled={currentPage <= 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              >
+                Previous
+              </Button>
+
+              <span className="px-2 font-medium text-zinc-700">
+                Page {currentPage} of {totalPages}
+              </span>
+
+              <Button
+                variant="outline"
+                size="sm"
+                icon={<ChevronRight className="w-3.5 h-3.5" />}
+                disabled={currentPage >= totalPages}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                className="flex-row-reverse"
+              >
+                Next
+              </Button>
+            </div>
           </div>
         </div>
       )}
