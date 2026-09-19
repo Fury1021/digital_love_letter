@@ -20,6 +20,7 @@ A modern, romantic, database-free digital love-letter web application built with
 - **💾 LocalStorage Draft Persistence:** Automatically saves your draft (`love-letter-draft`) with confirmation modal to reset.
 - **📄 Client-Side PDF Export:** Instant A4 portrait PDF generation using `html2canvas` and `jsPDF`.
 - **🔗 1-Click Sharing:** Copy Link with toast feedback and native mobile Web Share API support.
+- **🔒 Hidden Admin Dashboard (`/admin`):** Completely hidden from navigation menus. Password-protected ledger to view all generated letters, search by recipient/sender, open directly in new tabs, and export to CSV.
 - **🛡️ Secure & Accessible:** Zero `dangerouslySetInnerHTML`, runtime schema validation, sanitized inputs, keyboard navigation, and `prefers-reduced-motion` compliance.
 
 ---
@@ -101,6 +102,22 @@ src/
 
 ---
 
-## 🌐 Deployment
+## 🌐 Deployment on Vercel
 
-This application is fully compatible with **Vercel**, **Netlify**, or any static/serverless host. No environment variables, external services, or databases are required.
+This application is fully compatible with **Vercel** out-of-the-box.
+
+### Admin Dashboard Configuration
+1. The admin ledger is hidden at:
+   ```text
+   https://your-domain.vercel.app/admin
+   ```
+2. Set your custom admin password in Vercel under **Project Settings → Environment Variables**:
+   - `ADMIN_PASSWORD` = `YourSuperSecretPassword`
+   *(Default fallback is `loveadmin2026` if not set).*
+
+### Persistent Storage on Vercel
+In development, letters save to `data/letters.json`. When deploying to Vercel's serverless environment:
+1. In your **Vercel Dashboard**, go to **Storage → Create Database → Upstash Redis** (or **Vercel KV**).
+2. Connect it to your project.
+3. Vercel will automatically set the `KV_REST_API_URL` and `KV_REST_API_TOKEN` environment variables. The application will instantly use it with zero extra configuration!
+

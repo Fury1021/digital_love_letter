@@ -71,6 +71,25 @@ export const LetterEditor: React.FC = () => {
       const url = `${window.location.origin}/letter/${encoded}`;
       setShareUrl(url);
       setIsShareModalOpen(true);
+
+      // Asynchronously log to admin ledger (non-blocking)
+      fetch("/api/letters", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          encodedId: encoded,
+          recipient: letter.recipient,
+          sender: letter.sender,
+          title: letter.title,
+          theme: letter.theme,
+          font: letter.font,
+          content: letter.content,
+          createdAt: letter.createdAt || new Date().toISOString(),
+        }),
+      }).catch((err) => {
+        // Silent failure so link generation is never interrupted
+        console.warn("Could not log to admin ledger:", err);
+      });
     } catch (err) {
       console.error("Failed to generate link:", err);
       showToast("Could not generate share link. Please try again.");
