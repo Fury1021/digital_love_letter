@@ -42,27 +42,48 @@ export const LetterPaper: React.FC<LetterPaperProps> = ({
     xl: "text-3xl sm:text-4xl md:text-5xl leading-relaxed",
   };
 
-  // Determine pages: explicit '---' page break, or automatic 2 paragraphs per page if content is long
+  // Determine pages: explicit '---' page break, or substantial full-page grouping (1-4 pages)
   const rawContent = letter.content || "";
   let pages: string[][] = [];
 
   if (rawContent.includes("\n---\n") || rawContent.includes("\n---")) {
     const sections = rawContent.split(/\n---\n?/);
-    pages = sections.map((sec) =>
-      sec.split(/\n\n+/).filter((p) => p.trim().length > 0)
-    );
+    pages = sections
+      .map((sec) => sec.split(/\n\n+/).filter((p) => p.trim().length > 0))
+      .filter((sec) => sec.length > 0);
   } else {
     const allParagraphs = rawContent
       .split(/\n\n+/)
       .filter((p) => p.trim().length > 0);
 
-    if (allParagraphs.length > 2) {
-      // Group every 2 paragraphs into a page
-      for (let i = 0; i < allParagraphs.length; i += 2) {
-        pages.push(allParagraphs.slice(i, i + 2));
-      }
-    } else {
+    // Keep moderate letters (< 1200 characters or <= 4 paragraphs) on 1 full stationery page
+    if (rawContent.length < 1200 || allParagraphs.length <= 4) {
       pages = [allParagraphs];
+    } else {
+      // For longer letters, accumulate substantial content per page (~1000-1400 chars, 3-5 paragraphs)
+      const chunked: string[][] = [];
+      let currentPage: string[] = [];
+      let currentChars = 0;
+
+      for (const para of allParagraphs) {
+        if (
+          currentPage.length >= 3 &&
+          currentChars + para.length > 1200 &&
+          chunked.length < 3
+        ) {
+          chunked.push(currentPage);
+          currentPage = [para];
+          currentChars = para.length;
+        } else {
+          currentPage.push(para);
+          currentChars += para.length;
+        }
+      }
+
+      if (currentPage.length > 0) {
+        chunked.push(currentPage);
+      }
+      pages = chunked;
     }
   }
 

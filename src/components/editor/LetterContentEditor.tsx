@@ -116,6 +116,24 @@ export const LetterContentEditor: React.FC<LetterContentEditorProps> = ({
               </button>
             ))}
           </div>
+
+          <div className="h-3.5 w-[1px] bg-rose-200" />
+
+          {/* New Page Break Button */}
+          <button
+            type="button"
+            onClick={() => {
+              if (!content.trim()) {
+                onChangeContent("My words on Page 1...\n\n---\n\nMy words on Page 2...");
+              } else {
+                onChangeContent(`${content.trimEnd()}\n\n---\n\n`);
+              }
+            }}
+            className="px-2 py-0.5 rounded text-[11px] font-medium bg-white hover:bg-rose-100/60 text-rose-700 border border-rose-200/80 transition-colors flex items-center gap-1"
+            title="Insert a page break (---)"
+          >
+            <span>+ Page</span>
+          </button>
         </div>
       </div>
 
@@ -152,6 +170,10 @@ export const LetterContentEditor: React.FC<LetterContentEditorProps> = ({
             </button>
           ))}
         </div>
+
+        <p className="text-[11px] text-zinc-400 mt-2 italic">
+          💡 Want a multi-page letter? Click <strong>+ Page</strong> or write <code className="font-mono text-zinc-600 bg-rose-50 px-1 rounded">---</code> on a new line to divide into Page 1, Page 2, etc.
+        </p>
       </div>
     </div>
   );
