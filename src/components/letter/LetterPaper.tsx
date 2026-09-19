@@ -104,12 +104,19 @@ export const LetterPaper: React.FC<LetterPaperProps> = ({
   return (
     <div
       id={id}
-      className={`relative w-full max-w-2xl mx-auto rounded-3xl p-8 sm:p-12 md:p-16 transition-all duration-300 ${
+      onContextMenu={(e) => e.preventDefault()}
+      onCopy={(e) => e.preventDefault()}
+      onCut={(e) => e.preventDefault()}
+      onPaste={(e) => e.preventDefault()}
+      onDragStart={(e) => e.preventDefault()}
+      className={`protect-letter select-none relative w-full max-w-2xl mx-auto rounded-3xl p-8 sm:p-12 md:p-16 transition-all duration-300 ${
         background.cssClass
       } ${isPrintMode ? "shadow-none border border-zinc-200" : "shadow-paper-lg border"}`}
       style={{
         borderColor: theme.borderColor,
         color: theme.textColor,
+        userSelect: "none",
+        WebkitUserSelect: "none",
       }}
     >
       {/* Subtle Inner Framing Border */}

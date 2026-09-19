@@ -116,6 +116,36 @@ export default function LetterDetailPage() {
     setIsToastVisible(true);
   };
 
+  // Anti-copy protection for the letter content
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === "c" || e.key === "C")) {
+        const target = e.target as HTMLElement;
+        if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
+          return;
+        }
+        e.preventDefault();
+        showToast("This letter is written for your eyes only ❤️");
+      }
+    };
+
+    const handleCopy = (e: ClipboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
+        return;
+      }
+      e.preventDefault();
+      showToast("This letter is written for your eyes only ❤️");
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("copy", handleCopy);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("copy", handleCopy);
+    };
+  }, []);
+
   const handleDownloadPDF = async () => {
     if (!letter) return;
     setIsPdfLoading(true);
