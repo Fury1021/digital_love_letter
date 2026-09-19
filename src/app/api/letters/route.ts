@@ -3,6 +3,8 @@ import crypto from "crypto";
 import { getAllLetters, saveLetter, deleteLetter } from "@/lib/storage";
 import { LetterRecord } from "@/types/admin";
 
+export const dynamic = "force-dynamic";
+
 const DEFAULT_ADMIN_PASSWORD = "loveadmin2026";
 
 function isAuthorized(req: Request): boolean {

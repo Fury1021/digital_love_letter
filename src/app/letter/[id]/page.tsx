@@ -31,25 +31,60 @@ export default function LetterDetailPage() {
   const [isToastVisible, setIsToastVisible] = useState(false);
 
   useEffect(() => {
-    if (!rawId) {
-      setIsError(true);
+    let targetId = Array.isArray(rawId) ? rawId.join("/") : rawId;
+
+    // Fallback: extract from window.location if rawId is missing
+    if (!targetId && typeof window !== "undefined") {
+      const pathname = window.location.pathname;
+      if (pathname.includes("/letter/")) {
+        targetId = pathname.substring(pathname.indexOf("/letter/") + 8);
+      }
+      if (!targetId && window.location.hash) {
+        targetId = window.location.hash.replace(/^#(\/?letter\/|letter=)?/, "");
+      }
+      if (!targetId && window.location.search) {
+        const queryParams = new URLSearchParams(window.location.search);
+        targetId = queryParams.get("letter") || queryParams.get("data") || undefined;
+      }
+    }
+
+    if (!targetId) {
+      const timer = setTimeout(() => {
+        setIsError(true);
+        setIsLoading(false);
+      }, 400);
+      return () => clearTimeout(timer);
+    }
+
+    // 1. Try decoding targetId directly as compressed/encoded letter
+    const decoded = decodeLetter(targetId);
+    if (decoded) {
+      setLetter(decoded);
+      setIsError(false);
       setIsLoading(false);
       return;
     }
 
-    try {
-      const decoded = decodeLetter(rawId);
-      if (decoded) {
-        setLetter(decoded);
-      } else {
+    // 2. If decoding fails, check if targetId is an ID in the ledger (e.g., from admin list)
+    fetch(`/api/letters/public?id=${encodeURIComponent(targetId)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && data.success && data.encodedId) {
+          const letterFromId = decodeLetter(data.encodedId);
+          if (letterFromId) {
+            setLetter(letterFromId);
+            setIsError(false);
+            setIsLoading(false);
+            return;
+          }
+        }
         setIsError(true);
-      }
-    } catch (err) {
-      console.error("Failed to decode letter:", err);
-      setIsError(true);
-    } finally {
-      setIsLoading(false);
-    }
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setIsError(true);
+        setIsLoading(false);
+      });
   }, [rawId]);
 
   const showToast = (msg: string) => {
