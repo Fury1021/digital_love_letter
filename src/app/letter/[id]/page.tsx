@@ -182,17 +182,20 @@ export default function LetterDetailPage() {
   }
 
   if (isError || !letter) {
+    const isShortId = typeof rawId === "string" && rawId.length < 20;
+
     return (
-      <div className="max-w-md mx-auto px-4 py-20 text-center">
+      <div className="max-w-md mx-auto px-4 py-16 text-center">
         <div className="w-16 h-16 rounded-3xl bg-rose-50 border border-rose-200 flex items-center justify-center mx-auto mb-6 shadow-sm">
           <HeartCrack className="w-8 h-8 text-rose-500" />
         </div>
         <h1 className="text-2xl font-serif text-zinc-900 mb-2">
-          Letter Not Found or Corrupted
+          Letter Not Found
         </h1>
-        <p className="text-sm text-zinc-600 mb-8 leading-relaxed">
-          The link you opened might be incomplete or broken. Love letters carry
-          their entire story in the link—make sure the entire URL was copied.
+        <p className="text-sm text-zinc-600 mb-6 leading-relaxed">
+          {isShortId
+            ? "This short link may have expired or the hosting server was restarted. If you are the sender, your draft is safely saved in your browser! Please use or ask for the Permanent Link, which never expires and can never be deleted."
+            : "The link you opened might be incomplete or broken. Love letters carry their entire story in the link—make sure the entire URL was copied."}
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link href="/">
@@ -202,7 +205,7 @@ export default function LetterDetailPage() {
           </Link>
           <Link href="/create">
             <Button variant="primary" size="md" icon={<PenLine className="w-4 h-4" />}>
-              Write a New Letter
+              Open Letter Creator
             </Button>
           </Link>
         </div>

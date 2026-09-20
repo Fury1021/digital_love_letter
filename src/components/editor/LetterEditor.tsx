@@ -36,7 +36,8 @@ export const LetterEditor: React.FC = () => {
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
   const [fullEncodedUrl, setFullEncodedUrl] = useState("");
-  const [showFullUrl, setShowFullUrl] = useState(false);
+  const [shortUrl, setShortUrl] = useState("");
+  const [activeLinkTab, setActiveLinkTab] = useState<"permanent" | "short">("permanent");
   const [isCopied, setIsCopied] = useState(false);
   const [isPdfLoading, setIsPdfLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -66,7 +67,7 @@ export const LetterEditor: React.FC = () => {
     return () => clearTimeout(timer);
   }, [letter, isClient]);
 
-  // Handle Share link generation with clean Short ID
+  // Handle Share link generation with both Permanent and Short ID options
   const handleGenerateShareLink = () => {
     try {
       const encoded = encodeLetter(letter);
@@ -75,12 +76,14 @@ export const LetterEditor: React.FC = () => {
         Math.random().toString(36).slice(2, 6) +
         Math.random().toString(36).slice(2, 6);
 
-      const shortUrl = `${window.location.origin}/letter/${shortId}`;
-      const longUrl = `${window.location.origin}/letter/${encoded}`;
+      const generatedShortUrl = `${window.location.origin}/letter/${shortId}`;
+      const generatedPermanentUrl = `${window.location.origin}/letter/${encoded}`;
 
-      setShareUrl(shortUrl);
-      setFullEncodedUrl(longUrl);
-      setShowFullUrl(false);
+      // Default to permanent URL so love letters are NEVER lost or deleted!
+      setShortUrl(generatedShortUrl);
+      setFullEncodedUrl(generatedPermanentUrl);
+      setShareUrl(generatedPermanentUrl);
+      setActiveLinkTab("permanent");
       setIsShareModalOpen(true);
 
       // Cache locally on creator's device for instantaneous 0ms resolution
@@ -120,10 +123,15 @@ export const LetterEditor: React.FC = () => {
   };
 
   const handleCopyLink = async () => {
+    const target = activeLinkTab === "permanent" ? fullEncodedUrl : shortUrl;
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      await navigator.clipboard.writeText(target);
       setIsCopied(true);
-      showToast("Link copied to clipboard ❤️");
+      showToast(
+        activeLinkTab === "permanent"
+          ? "Permanent link copied ❤️ It will last forever!"
+          : "Short link copied ❤️"
+      );
       setTimeout(() => setIsCopied(false), 2500);
     } catch {
       showToast("Failed to copy link. Please copy manually.");
@@ -131,12 +139,13 @@ export const LetterEditor: React.FC = () => {
   };
 
   const handleNativeShare = async () => {
+    const target = activeLinkTab === "permanent" ? fullEncodedUrl : shortUrl;
     if (navigator.share) {
       try {
         await navigator.share({
           title: letter.title || "A Love Letter for You",
           text: `A romantic digital letter written for ${letter.recipient || "you"}`,
-          url: shareUrl,
+          url: target,
         });
       } catch {
         // User cancelled or share failed
@@ -340,17 +349,58 @@ export const LetterEditor: React.FC = () => {
         maxWidth="lg"
       >
         <div className="space-y-4">
-          <p className="text-sm text-zinc-600">
-            Anyone with this link will receive your beautifully animated envelope
-            and personalized letter. No login or database required!
-          </p>
+          {/* Link Type Selector Tabs */}
+          <div className="flex rounded-2xl bg-rose-100/60 p-1 border border-rose-200">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveLinkTab("permanent");
+                setShareUrl(fullEncodedUrl);
+              }}
+              className={`flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center justify-center gap-1.5 ${
+                activeLinkTab === "permanent"
+                  ? "bg-white text-rose-700 shadow-sm"
+                  : "text-zinc-600 hover:text-zinc-900"
+              }`}
+            >
+              <span>🔒 Permanent Link</span>
+              <span className="hidden sm:inline text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full font-semibold">
+                Never Expires
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveLinkTab("short");
+                setShareUrl(shortUrl);
+              }}
+              className={`flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center justify-center gap-1.5 ${
+                activeLinkTab === "short"
+                  ? "bg-white text-rose-700 shadow-sm"
+                  : "text-zinc-600 hover:text-zinc-900"
+              }`}
+            >
+              <span>⚡ Short Link</span>
+            </button>
+          </div>
+
+          {/* Tab Explanation Banner */}
+          {activeLinkTab === "permanent" ? (
+            <div className="rounded-xl bg-emerald-50/80 border border-emerald-200 p-3 text-xs text-emerald-900 leading-relaxed">
+              <strong className="font-semibold text-emerald-800">✨ 100% Lifetime Guarantee:</strong> This link embeds your entire letter directly into the URL. It will <strong>never expire, never be deleted, and requires zero database</strong>. It works forever on any device!
+            </div>
+          ) : (
+            <div className="rounded-xl bg-amber-50/80 border border-amber-200 p-3 text-xs text-amber-900 leading-relaxed">
+              <strong className="font-semibold text-amber-800">⚠️ Storage Notice:</strong> Short links use an 8-character ID saved on the server. If your host (like Vercel) does not have Upstash Redis connected, server restarts may clear short links. <strong>For guaranteed lifetime delivery, use the Permanent Link tab!</strong>
+            </div>
+          )}
 
           {/* URL Box */}
           <div className="flex items-center gap-2 p-2 bg-rose-50/60 rounded-2xl border border-rose-200">
             <input
               type="text"
               readOnly
-              value={showFullUrl ? fullEncodedUrl : shareUrl}
+              value={activeLinkTab === "permanent" ? fullEncodedUrl : shortUrl}
               className="flex-1 bg-transparent px-3 py-1.5 text-xs sm:text-sm text-zinc-800 font-mono focus:outline-none select-all truncate"
             />
             <Button
@@ -364,11 +414,15 @@ export const LetterEditor: React.FC = () => {
                 )
               }
               onClick={async () => {
-                const target = showFullUrl ? fullEncodedUrl : shareUrl;
+                const target = activeLinkTab === "permanent" ? fullEncodedUrl : shortUrl;
                 try {
                   await navigator.clipboard.writeText(target);
                   setIsCopied(true);
-                  showToast("Link copied to clipboard ❤️");
+                  showToast(
+                    activeLinkTab === "permanent"
+                      ? "Permanent link copied ❤️ It will last forever!"
+                      : "Short link copied ❤️"
+                  );
                   setTimeout(() => setIsCopied(false), 2500);
                 } catch {
                   showToast("Failed to copy link.");
@@ -379,22 +433,8 @@ export const LetterEditor: React.FC = () => {
             </Button>
           </div>
 
-          {/* Short Link indicator & toggle */}
-          <div className="flex items-center justify-between text-xs text-zinc-500 px-1">
-            <span className="text-emerald-700 font-medium flex items-center gap-1">
-              <span>⚡</span> {showFullUrl ? "Self-contained encoded URL" : "Clean, short shareable link"}
-            </span>
-            <button
-              type="button"
-              onClick={() => setShowFullUrl(!showFullUrl)}
-              className="text-rose-600 hover:underline hover:text-rose-700 font-medium"
-            >
-              {showFullUrl ? "Use Short Link" : "View Full URL"}
-            </button>
-          </div>
-
           {/* Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2.5 pt-2">
+          <div className="flex flex-wrap items-center gap-2.5 pt-1">
             <Button
               variant="secondary"
               size="md"
@@ -405,7 +445,7 @@ export const LetterEditor: React.FC = () => {
               Share via...
             </Button>
             <a
-              href={shareUrl}
+              href={activeLinkTab === "permanent" ? fullEncodedUrl : shortUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full border border-zinc-200 bg-white hover:bg-rose-50 text-sm font-medium text-zinc-700 hover:text-rose-700 transition-colors"

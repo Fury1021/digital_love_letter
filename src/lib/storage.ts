@@ -2,8 +2,16 @@ import fs from "fs";
 import path from "path";
 import { LetterRecord } from "@/types/admin";
 
-const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+const KV_URL =
+  process.env.KV_REST_API_URL ||
+  process.env.UPSTASH_REDIS_REST_URL ||
+  process.env.VERCEL_KV_REST_API_URL ||
+  process.env.REDIS_REST_API_URL;
+const KV_TOKEN =
+  process.env.KV_REST_API_TOKEN ||
+  process.env.UPSTASH_REDIS_REST_TOKEN ||
+  process.env.VERCEL_KV_REST_API_TOKEN ||
+  process.env.REDIS_REST_API_TOKEN;
 const LOCAL_DATA_DIR = path.join(process.cwd(), "data");
 const LOCAL_DATA_FILE = path.join(LOCAL_DATA_DIR, "letters.json");
 
